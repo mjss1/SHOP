@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+data/
+.DS_Store
+Thumbs.db

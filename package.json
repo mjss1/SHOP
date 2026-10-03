@@ -1,0 +1,33 @@
+{
+  "name": "cloud-shop",
+  "version": "1.0.0",
+  "description": "基于 Cloudflare Pages Functions + Cloudflare D1 边缘数据库的个人邮箱交易与发卡系统",
+  "main": "server.js",
+  "scripts": {
+    "start": "wrangler pages dev ./public --port=8788 --d1=DB=shop-db-id",
+    "dev": "wrangler pages dev ./public --port=8788 --d1=DB=shop-db-id",
+    "test": "node test_system.js",
+    "db:init:local": "wrangler d1 execute shop-db --local --file=./schema.sql",
+    "db:create:remote": "wrangler d1 create shop-db",
+    "db:init:remote": "wrangler d1 execute shop-db --remote --file=./schema.sql",
+    "deploy": "wrangler pages deploy ./public"
+  },
+  "keywords": [
+    "cloudflare",
+    "pages",
+    "d1",
+    "sqlite",
+    "faka",
+    "fingerprint"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.147.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

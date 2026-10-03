@@ -1,0 +1,9 @@
+name = "cloud-shop"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "./public"
+
+# Cloudflare D1 边缘数据库绑定 (已绑定你刚刚创建的真实云端数据库)
+[[d1_databases]]
+binding = "DB"
+database_name = "shop-db"
+database_id = "9f59618f-e276-4366-9b7c-3607cf886570"

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloudflare Edge Portal | 极速边缘体验</title>
+  <meta name="description" content="专为测试 Cloudflare Pages / Workers 打造的现代化极客探索主页，包含实时节点探测、边缘延迟测试、WebCrypto 工具箱与动态视觉。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 背景动态粒子画布 -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- 顶部光晕背景装饰 -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <!-- 主体容器 -->
+  <div class="container">
+    <!-- 头部导航与标语 -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Cloudflare <span class="badge-cf">Pages</span></span>
+          <span class="brand-sub">Edge Verification Station</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="status-indicator">
+          <span class="pulse-dot"></span>
+          <span id="service-status">边缘节点运行正常</span>
+        </div>
+        <button id="theme-toggle" class="btn-icon" title="切换氛围光效">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 英雄区 (Hero Section) -->
+    <section class="hero">
+      <div class="hero-tag">⚡ 极速全网静态托管 · 测试基站</div>
+      <h1 class="hero-title">
+        Hello from <span class="text-gradient">The Edge</span>
+      </h1>
+      <p class="hero-desc">
+        恭喜！如果这页内容能正常打开，说明你的静态资源已在 Cloudflare 全球 300+ 边缘数据中心加速分发。
+        页面内置了 Cloudflare 诊断探针、延迟测速雷达与 Web Crypto 实时工具。
+      </p>
+      
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num" id="stat-latency">-- ms</span>
+          <span class="stat-label">到最近节点延迟</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-colo">LOCATING</span>
+          <span class="stat-label">连接数据中心 (Colo)</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-ip">Detecting...</span>
+          <span class="stat-label">访客边缘出口 IP</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 核心卡片网格 -->
+    <main class="grid-cards">
+      <!-- 卡片 1: Cloudflare Trace 边缘探针 -->
+      <section class="card glass-card" id="card-trace">
+        <div class="card-header">
+          <div class="card-icon icon-trace">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h3>边缘节点诊断 (cdn-cgi/trace)</h3>
+            <p>实时读取 Cloudflare 注入的原生边缘环境参数</p>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="trace-terminal">
+            <div class="terminal-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="terminal-title">cf-probe@edge:~$ trace --detail</span>
+              <button class="btn-mini" id="btn-refresh-trace">重新探测</button>
+            </div>
+            <pre id="trace-raw" class="terminal-content">正在查询边缘探针数据...</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 2: 全球节点 Ping 测速 -->
+      <section class="card glass-card" id="card-ping">
+        <div class="card-header">
+          <div class="card-icon icon-radar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a10 10 0 1 0 10 10H12V2z"></path>
+              <path d="M12 12 2.1 12a10.1 10.1 0 0 0 1.9 4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>全球主要枢纽延迟仿真测试</h3>
+            <p>测试本地网络到 Cloudflare 全球热门 PoP 的往返时间</p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="ping-list" id="ping-list">
+            <!-- 动态注入测速项 -->
+          </div>
+          <button id="btn-run-ping" class="btn-primary full-width">
+            <span class="btn-text">一键开始全球测速</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 卡片 3: 纯客户端 WebCrypto 密态工坊 -->
+      <section class="card glass-card" id="card-crypto">
+        <div class="card-header">
+          <div class="card-icon icon-crypto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>浏览器边缘即时演算</h3>
+            <p>利用现代浏览器原生 Web Cryptography API 秒级加密</p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="form-group">
+            <label for="input-crypto">测试文本或字符串：</label>
+            <input type="text" id="input-crypto" value="Hello Cloudflare Pages 2026!" placeholder="输入任意文本测试交互...">
+          </div>
+
+          <div class="crypto-results">
+            <div class="result-row">
+              <span class="label">SHA-256 哈希:</span>
+              <code id="res-sha256" class="code-box">计算中...</code>
+              <button class="btn-copy" data-target="res-sha256">复制</button>
+            </div>
+            <div class="result-row">
+              <span class="label">Base64 编码:</span>
+              <code id="res-base64" class="code-box">计算中...</code>
+              <button class="btn-copy" data-target="res-base64">复制</button>
+            </div>
+            <div class="result-row">
+              <span class="label">字符统计:</span>
+              <span id="res-length" class="text-pill">-- 字符</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 卡片 4: 部署指引与环境说明 -->
+      <section class="card glass-card" id="card-deploy">
+        <div class="card-header">
+          <div class="card-icon icon-guide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
+              <path d="M12 12v9"></path>
+              <path d="m16 16-4-4-4 4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>Cloudflare 快速部署指南</h3>
+            <p>三种简单部署方式，任选一种 1 分钟上线</p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="deploy-steps">
+            <div class="step-card">
+              <div class="step-index">1</div>
+              <div class="step-content">
+                <strong>方法 A: 控制台直接拖拽 (推荐)</strong>
+                <p>登录 <a href="https://dash.cloudflare.com/" target="_blank" rel="noreferrer">Cloudflare Dash</a> ➔ <strong>Workers 与 Pages</strong> ➔ <strong>创建应用程序</strong> ➔ 选择 <strong>Pages (上传资产)</strong> ➔ 将包含当前文件的文件夹直接拖进去即可！</p>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-index">2</div>
+              <div class="step-content">
+                <strong>方法 B: Git 持续交付 (GitHub / GitLab)</strong>
+                <p>将此文件夹推送到 GitHub 仓库，在 Cloudflare Pages 绑定该仓库，构建命令留空，构建输出目录填 <code>/</code> 即可自动部署。</p>
+              </div>
+            </div>
+
+            <div class="step-card">
+              <div class="step-index">3</div>
+              <div class="step-content">
+                <strong>方法 C: Wrangler CLI 命令行发布</strong>
+                <div class="code-snippet">
+                  <code>npx wrangler pages deploy ./ --project-name=my-test-app</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 交互彩蛋 / 粒子控制器 -->
+    <section class="interactive-bar glass-card">
+      <div class="bar-info">
+        <span class="bar-title">✨ 粒子动力学控制台</span>
+        <span class="bar-desc">移动鼠标或点击屏幕体验粒子排斥波形。</span>
+      </div>
+      <div class="bar-actions">
+        <button id="btn-burst" class="btn-secondary">🎆 产生引力激波</button>
+        <button id="btn-toggle-particles" class="btn-secondary">切换连线模式</button>
+      </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+      <p>Cloudflare Pages Verification Portal · Crafted with Modern HTML5, CSS3 & JavaScript</p>
+      <div class="footer-links">
+        <a href="https://developers.cloudflare.com/pages/" target="_blank" rel="noreferrer">官方文档</a>
+        <span>·</span>
+        <a href="https://www.cloudflarestatus.com/" target="_blank" rel="noreferrer">Cloudflare 全球状态</a>
+        <span>·</span>
+        <a href="https://dash.cloudflare.com/" target="_blank" rel="noreferrer">控制台</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast 提示容器 -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
